@@ -1,54 +1,89 @@
-import React from 'react'
-import { useState } from 'react'
-import './auth.css'
-import axios from 'axios'
-import { Link } from 'react-router-dom'
+import React, { useState } from "react";
+import "./auth.css";
+import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
+  const navigate = useNavigate();
 
-const [username, setusername] = useState('')
-const [password ,setpassword] = useState('')
+  async function handleSubmit(e) {
+    e.preventDefault();
 
+    setError("");
+    setLoading(true);
 
-
-
-async function handleSubmit(e){
-    e.preventDefault()
     try {
-        const res = await axios.post('http://localhost:3000/api/auth/login', {
-            username,
-            password,
-        })
-        console.log('login success', res.data)
-    } catch (err) {
-        console.error('login error', err)
-    }
-}
+      const res = await axios.post(
+        "http://localhost:3000/api/auth/login",
+        {
+          username,
+          password,
+        },
+        {
+          withCredentials: true,
+        }
+      );
 
-   
+      console.log("Login success:", res.data);
+
+      navigate("/home");
+    } catch (err) {
+      console.error("Login error:", err);
+
+      if (err.response) {
+        setError(err.response.data.message || "Invalid username or password");
+      } else {
+        setError("Server is not running");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="auth-page">
-        <main className="auth-main">
-            <form className="auth-form" action="" onSubmit={handleSubmit}>
-                <h1 className="auth-title">Login</h1>
-                <input className="auth-input" value={username} onChange={(e)=>{
-                    setusername(e.target.value)
-                }} type="text" placeholder='username' name='username' />
-                <input className="auth-input" value={password}
-                onChange={(e)=>{
-                    setpassword(e.target.value)
-                }} type="password" placeholder='password' name='password' />
-                <button className="auth-button" type='submit'>Login</button>
-                <p>Don't have an account? <Link to="/signup">Signup</Link></p>
-            </form>
-        </main>
+      <main className="auth-main">
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <h1 className="auth-title">Login</h1>
+
+          <input
+            className="auth-input"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            type="text"
+            placeholder="Username"
+            name="username"
+            required
+          />
+
+          <input
+            className="auth-input"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            type="password"
+            placeholder="Password"
+            name="password"
+            required
+          />
+
+          {error && <p className="error">{error}</p>}
+
+          <button className="auth-button" type="submit" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
+
+          <p>
+            Don't have an account? <Link to="/signup">Signup</Link>
+          </p>
+        </form>
+      </main>
     </div>
-  )
+  );
+};
 
-
-}
-
-
-
-export default Login
+export default Login;

@@ -20,6 +20,8 @@ async function handleSubmit(e){
         username,
         email,
         password
+      }, {
+        withCredentials: true,
       })
       console.log('signup success', res.data)
     }catch(err){
